@@ -1,0 +1,15 @@
+{
+  "name": "draggable-notes",
+  "version": "1.0.0",
+  "description": "draggable 'PostIt' style notes",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ben Berntson",
+  "license": "MIT",
+  "devDependencies": {
+    "browserify": "^13.0.1",
+    "watchify": "^3.7.0"
+  }
+}
