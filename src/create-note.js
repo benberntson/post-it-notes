@@ -1,7 +1,12 @@
-var noteContent = require('./note-content');
+var innerNote   = require('./inner-note'),
+    randomColor = require('./random-color');
 
-module.exports = function(textContent,color){
+module.exports = function createNote(id,zIndex,textContent,color){
   var note = document.createElement('div');
-  note.innerHTML = noteContent(textContent || " ");
-  note.backgroundColor = color || "#ffff94";
+  note.innerHTML = innerNote(textContent || " ");
+  note.classList.add('note');
+  note.style.backgroundColor = color || randomColor();
+  note.style.zIndex = zIndex;
+  note.style.id = id;
+  return note;
 }

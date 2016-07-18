@@ -1,8 +1,8 @@
-module.exports = function draggable(element){
+module.exports = function makeDragable(element){
   element.addEventListener('mousedown',function(e){
     var boundingRect = element.getBoundingClientRect(),
         originalX    = boundingRect.left - e.clientX,
-        originalY    = boundingRect.top - e.clientY;
+        originalY    = boundingRect.top  - e.clientY;
     document.onmousemove = function(e){
       element.style.left = originalX + e.clientX + 'px';
       element.style.top  = originalY + e.clientY + 'px';

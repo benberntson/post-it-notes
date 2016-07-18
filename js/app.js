@@ -1,0 +1,137 @@
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var innerNote   = require('./inner-note'),
+    randomColor = require('./random-color');
+
+module.exports = function createNote(id,zIndex,textContent,color){
+  var note = document.createElement('div');
+  note.innerHTML = innerNote(textContent || " ");
+  note.classList.add('note');
+  note.style.backgroundColor = color || randomColor();
+  note.style.zIndex = zIndex;
+  note.style.id = id;
+  return note;
+}
+
+},{"./inner-note":3,"./random-color":10}],2:[function(require,module,exports){
+const PIZZA_NOTE = {
+  content: "Order pizza\nwith:\nolives\nonions\nanchovies\n\nno:pickles",
+  zIndex: 1,
+  id: '1'
+};
+
+const PHONE_NUMBER_NOTE = {
+  content: "Call Ted\nNumber: 435-555-5555",
+  zIndex: 2,
+  id: '2'
+};
+
+const DEFAULT_STATE = {
+  notes : [PIZZA_NOTE,PHONE_NUMBER_NOTE],
+  maxId: 2
+};
+
+
+module.exports = DEFAULT_STATE;
+
+},{}],3:[function(require,module,exports){
+var noteContent = require('./note-content');
+
+module.exports = function(noteText){
+  return '<div class="terminator">X</div>' + noteContent(noteText);
+};
+
+},{"./note-content":7}],4:[function(require,module,exports){
+module.exports = function insertLineBreaks(text){
+  return text.split('\n').join('<br>');
+};
+
+},{}],5:[function(require,module,exports){
+const NOTES_APP_ID = 'notes',
+      defaultState  = require('./default-state');
+
+module.exports = function(){
+  return localStorage.getItem(NOTES_APP_ID) ?
+        JSON.parse(localStorage.getItem(NOTES_APP_ID)) : defaultState;
+}
+
+},{"./default-state":2}],6:[function(require,module,exports){
+module.exports = function makeDragable(element){
+  element.addEventListener('mousedown',function(e){
+    var boundingRect = element.getBoundingClientRect(),
+        originalX    = boundingRect.left - e.clientX,
+        originalY    = boundingRect.top  - e.clientY;
+    document.onmousemove = function(e){
+      element.style.left = originalX + e.clientX + 'px';
+      element.style.top  = originalY + e.clientY + 'px';
+    };
+  });
+  element.addEventListener('mouseup',function(){
+    document.onmousemove = null;
+  });
+  return element;
+};
+
+},{}],7:[function(require,module,exports){
+var insertLineBreaks = require('./insert-line-breaks');
+module.exports = function(noteContent){
+  return ['<div class="note-content" contenteditable="true">',
+          insertLineBreaks(noteContent),
+          '</div>'].join('');
+}
+
+},{"./insert-line-breaks":4}],8:[function(require,module,exports){
+var createNote = require('./create-note');
+
+module.exports = function noteToElement(card){
+  return createNote(card.id,card.zIndex,card.content);
+}
+
+},{"./create-note":1}],9:[function(require,module,exports){
+var makeDragable  = require('./make-dragable'),
+    loadState     = require('./load-state'),
+    randomPos     = require('./random-pos'),
+    noteToElement = require('./note-to-element');
+
+window.addEventListener('load',function(){
+  var draggableContent = document.querySelectorAll('.note');
+  Array.prototype.forEach.call(draggableContent,makeDragable);
+
+  window.state = loadState();
+  window.state.notes.map(note => {
+    return noteToElement(note);
+  }).map(makeDragable)
+  .map(randomPos)
+  .forEach(noteElement => document.body.appendChild(noteElement));
+
+
+  console.log('app loaded');
+})
+
+},{"./load-state":5,"./make-dragable":6,"./note-to-element":8,"./random-pos":11}],10:[function(require,module,exports){
+const LIGHT_PINK   = "#ffe9ec",
+      LIGHT_BLUE   = "#e9fffc",
+      LIGHT_ORANGE = "#fff4b6",
+      LIGHT_GREEN  = "#e6ffb7",
+      LIGHT_YELLOW = "#feffb7",
+      COLORS       = [
+        LIGHT_PINK,
+        LIGHT_BLUE,
+        LIGHT_ORANGE,
+        LIGHT_GREEN,
+        LIGHT_YELLOW
+      ];
+
+module.exports = function(){
+  return COLORS[Math.floor(Math.random() * COLORS.length)];
+};
+
+},{}],11:[function(require,module,exports){
+const OFFSET_VAL = 750;
+
+module.exports = function randomPos(element){
+  element.style.top  = Math.floor(Math.random() * OFFSET_VAL) + 'px';
+  element.style.left = Math.floor(Math.random() * OFFSET_VAL) + 'px';
+  return element;
+}
+
+},{}]},{},[9]);
