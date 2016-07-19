@@ -8,44 +8,70 @@ module.exports = function createNote(id,zIndex,textContent,color){
   note.classList.add('note');
   note.style.backgroundColor = color || randomColor();
   note.style.zIndex = zIndex;
-  note.style.id = id;
+  note.id = id;
+  note.firstChild.addEventListener('click',function(){
+    note.parentNode.removeChild(note);
+  });
   return note;
 }
 
-},{"./inner-note":3,"./random-color":10}],2:[function(require,module,exports){
+},{"./inner-note":5,"./random-color":12}],2:[function(require,module,exports){
 const PIZZA_NOTE = {
   content: "Order pizza\nwith:\nolives\nonions\nanchovies\n\nno:pickles",
-  zIndex: 1,
   id: '1'
 };
 
 const PHONE_NUMBER_NOTE = {
   content: "Call Ted\nNumber: 435-555-5555",
-  zIndex: 2,
   id: '2'
 };
 
 const DEFAULT_STATE = {
   notes : [PIZZA_NOTE,PHONE_NUMBER_NOTE],
-  maxId: 2
+  maxId: 2,
+  topZIndex: 3
 };
 
 
 module.exports = DEFAULT_STATE;
 
 },{}],3:[function(require,module,exports){
+module.exports = function(state){
+  state = state || window.state;
+  var currentZIndex = state.topZIndex + 1;
+  state.topZIndex = currentZIndex;
+  return currentZIndex;
+}
+
+},{}],4:[function(require,module,exports){
+var createNote = require('./create-note'),
+    getMaxZIndex = require('./get-max-z-index'),
+    makeDragable = require('./make-dragable'),
+    randomPos = require('./random-pos');
+
+module.exports = function initCreateBtn(element){
+  element.addEventListener('click',function(){
+    var note = createNote(window.state.maxId,getMaxZIndex());
+    note = makeDragable(note);
+    note = randomPos(note);
+    document.body.appendChild(note);
+  });
+  return element;
+}
+
+},{"./create-note":1,"./get-max-z-index":3,"./make-dragable":8,"./random-pos":13}],5:[function(require,module,exports){
 var noteContent = require('./note-content');
 
 module.exports = function(noteText){
   return '<div class="terminator">X</div>' + noteContent(noteText);
 };
 
-},{"./note-content":7}],4:[function(require,module,exports){
+},{"./note-content":9}],6:[function(require,module,exports){
 module.exports = function insertLineBreaks(text){
   return text.split('\n').join('<br>');
 };
 
-},{}],5:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 const NOTES_APP_ID = 'notes',
       defaultState  = require('./default-state');
 
@@ -54,9 +80,12 @@ module.exports = function(){
         JSON.parse(localStorage.getItem(NOTES_APP_ID)) : defaultState;
 }
 
-},{"./default-state":2}],6:[function(require,module,exports){
+},{"./default-state":2}],8:[function(require,module,exports){
+var getMaxZIndex = require('./get-max-z-index');
+
 module.exports = function makeDragable(element){
   element.addEventListener('mousedown',function(e){
+    element.style.zIndex = '' + getMaxZIndex();
     var boundingRect = element.getBoundingClientRect(),
         originalX    = boundingRect.left - e.clientX,
         originalY    = boundingRect.top  - e.clientY;
@@ -71,7 +100,7 @@ module.exports = function makeDragable(element){
   return element;
 };
 
-},{}],7:[function(require,module,exports){
+},{"./get-max-z-index":3}],9:[function(require,module,exports){
 var insertLineBreaks = require('./insert-line-breaks');
 module.exports = function(noteContent){
   return ['<div class="note-content" contenteditable="true">',
@@ -79,35 +108,38 @@ module.exports = function(noteContent){
           '</div>'].join('');
 }
 
-},{"./insert-line-breaks":4}],8:[function(require,module,exports){
+},{"./insert-line-breaks":6}],10:[function(require,module,exports){
 var createNote = require('./create-note');
 
 module.exports = function noteToElement(card){
   return createNote(card.id,card.zIndex,card.content);
 }
 
-},{"./create-note":1}],9:[function(require,module,exports){
+},{"./create-note":1}],11:[function(require,module,exports){
 var makeDragable  = require('./make-dragable'),
     loadState     = require('./load-state'),
     randomPos     = require('./random-pos'),
-    noteToElement = require('./note-to-element');
+    noteToElement = require('./note-to-element'),
+    initCreateBtn = require('./init-create-btn');
 
 window.addEventListener('load',function(){
   var draggableContent = document.querySelectorAll('.note');
   Array.prototype.forEach.call(draggableContent,makeDragable);
 
   window.state = loadState();
-  window.state.notes.map(note => {
-    return noteToElement(note);
-  }).map(makeDragable)
-  .map(randomPos)
-  .forEach(noteElement => document.body.appendChild(noteElement));
+  window.state.notes
+    .map(noteToElement)
+    .map(makeDragable)
+    .map(randomPos)
+    .forEach(noteElement => document.body.appendChild(noteElement));
 
+  var createNoteButton = document.getElementById('createNoteButton');
+  initCreateBtn(createNoteButton);
 
   console.log('app loaded');
 })
 
-},{"./load-state":5,"./make-dragable":6,"./note-to-element":8,"./random-pos":11}],10:[function(require,module,exports){
+},{"./init-create-btn":4,"./load-state":7,"./make-dragable":8,"./note-to-element":10,"./random-pos":13}],12:[function(require,module,exports){
 const LIGHT_PINK   = "#ffe9ec",
       LIGHT_BLUE   = "#e9fffc",
       LIGHT_ORANGE = "#fff4b6",
@@ -125,7 +157,7 @@ module.exports = function(){
   return COLORS[Math.floor(Math.random() * COLORS.length)];
 };
 
-},{}],11:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 const OFFSET_VAL = 750;
 
 module.exports = function randomPos(element){
@@ -134,4 +166,4 @@ module.exports = function randomPos(element){
   return element;
 }
 
-},{}]},{},[9]);
+},{}]},{},[11]);

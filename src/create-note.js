@@ -7,6 +7,9 @@ module.exports = function createNote(id,zIndex,textContent,color){
   note.classList.add('note');
   note.style.backgroundColor = color || randomColor();
   note.style.zIndex = zIndex;
-  note.style.id = id;
+  note.id = id;
+  note.firstChild.addEventListener('click',function(){
+    note.parentNode.removeChild(note);
+  });
   return note;
 }
